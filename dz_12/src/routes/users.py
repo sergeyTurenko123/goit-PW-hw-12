@@ -13,26 +13,26 @@ router = APIRouter(prefix='/users')
 @router.get("/",  response_model=List[ContactResponse])
 async def read_users(birthdays: bool, skip: int = 0, limit: int = 100, db: Session = Depends(get_db),
                      current_user: User = Depends(auth_service.get_current_user)):
-    users_birthdays = await repository_users.get_users_birthdays(skip, limit, current_user, db)
-    users_all = await repository_users.get_users(skip, limit, current_user, db)
+    users_birthdays = await repository_users.get_contacts_birthdays(skip, limit, current_user, db)
+    users_all = await repository_users.get_contacts(skip, limit, current_user, db)
     if birthdays:
         return users_birthdays
     else:
         return users_all
 
-@router.get("/{user_id}", response_model=ContactResponse)
-async def read_user(user_id: int, db: Session = Depends(get_db),
+@router.get("/{contact_id}", response_model=ContactResponse)
+async def read_user(contact_id: int, db: Session = Depends(get_db),
                     current_user: User = Depends(auth_service.get_current_user)):
-    user = await repository_users.get_user(user_id, current_user, db)
+    user = await repository_users.get_contact(contact_id, current_user, db)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
-@router.get("/user/", response_model=ContactResponse)
+@router.get("/contact/", response_model=ContactResponse)
 async def read_user(name: str| None=None, surname:  str| None=None, email_address: str| None=None,
                      phone_number: str| None=None, db: Session = Depends(get_db),
                      current_user: User = Depends(auth_service.get_current_user)):
-    user = await repository_users.get_user_name(name, surname, email_address, phone_number,
+    user = await repository_users.get_contact_name(name, surname, email_address, phone_number,
                                                 current_user, db)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

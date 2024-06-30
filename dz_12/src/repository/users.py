@@ -28,10 +28,10 @@ async def update_token(user: User, token: str | None, db: Session) -> None:
     user.refresh_token = token
     db.commit()
 
-async def get_users(skip: int, limit: int, user: User, db: Session) -> List[Contact]:
+async def get_contacts(skip: int, limit: int, user: User, db: Session) -> List[Contact]:
     return db.query(Contact).filter(Contact.user_id==user.id).offset(skip).limit(limit).all()
 
-async def get_users_birthdays(skip: int, limit: int, user: User, db: Session) -> List[Contact]:
+async def get_contacts_birthdays(skip: int, limit: int, user: User, db: Session) -> List[Contact]:
     users = db.query(Contact).filter(Contact.user_id==user.id).offset(skip).limit(limit).all()
     now = dtdt.today().date()
     birthdays = []
@@ -49,10 +49,10 @@ async def get_users_birthdays(skip: int, limit: int, user: User, db: Session) ->
                     birthdays.append(user)
     return birthdays
         
-async def get_user(user_id: int, user:User, db: Session) -> User:
+async def get_contact(user_id: int, user:User, db: Session) -> User:
     return db.query(Contact).filter(Contact.user_id==user.id).filter(Contact.id == user_id).first()
 
-async def get_user_name(name: str, surname:str, email_address:str, phone_number: str, user:User, db: Session) -> Contact:
+async def get_contact_name(name: str, surname:str, email_address:str, phone_number: str, user:User, db: Session) -> Contact:
     if db.query(Contact).filter(Contact.user_id==user.id).first():
         if name:
             return db.query(Contact).filter(Contact.name == name).first()
@@ -63,10 +63,10 @@ async def get_user_name(name: str, surname:str, email_address:str, phone_number:
         elif phone_number:
             return db.query(Contact).filter(Contact.phone_number== phone_number).first()
 
-async def create_contact(body: ContactBase, db: Session) -> Contact:
+async def create_contact(body: ContactBase, user:User, db: Session) -> Contact:
     user = Contact(name=body.name, surname=body.surname, email_address=body.email_address,
                     phone_number=body.phone_number, date_of_birth = body.date_of_birth,
-                      additional_data = body.additional_data)
+                      additional_data = body.additional_data, user_id=user.id)
     db.add(user)
     db.commit()
     db.refresh(user)
